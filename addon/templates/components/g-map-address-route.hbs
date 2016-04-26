@@ -3,6 +3,8 @@
                 strokeColor=strokeColor strokeWeight=strokeWeight strokeOpacity=strokeOpacity
                 originLat=originLat originLng=originLng
                 destinationLat=destinationLat destinationLng=destinationLng
+                onDistanceChange=onDistanceChange
+                onDurationChange=onDurationChange
                 as |routeContext|}}
     {{yield routeContext}}
   {{/g-map-route}}
@@ -10,5 +12,7 @@
   {{g-map-route mapContext zIndex=zIndex
                 strokeColor=strokeColor strokeWeight=strokeWeight strokeOpacity=strokeOpacity
                 originLat=originLat originLng=originLng
-                destinationLat=destinationLat destinationLng=destinationLng}}
+                destinationLat=destinationLat destinationLng=destinationLng
+                onDistanceChange=onDistanceChange
+                onDurationChange=onDurationChange}}
 {{/if}}

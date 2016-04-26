@@ -3,7 +3,7 @@ import layout from '../templates/components/g-map-route';
 import GMapComponent from './g-map';
 import compact from '../utils/compact';
 
-const { isEmpty, isPresent, observer, computed, run, assert } = Ember;
+const { isEmpty, isPresent, observer, computed, run, assert, typeOf } = Ember;
 
 const allowedPolylineOptions = Ember.A(['strokeColor', 'strokeWeight', 'strokeOpacity', 'zIndex']);
 
@@ -71,6 +71,7 @@ const GMapRouteComponent = Ember.Component.extend({
   }),
 
   updateRoute() {
+    const component = this;
     const service = this.get('directionsService');
     const renderer = this.get('directionsRenderer');
     const originLat = this.get('originLat');
@@ -95,6 +96,8 @@ const GMapRouteComponent = Ember.Component.extend({
       service.route(request, (response, status) => {
         if (status === google.maps.DirectionsStatus.OK) {
           renderer.setDirections(response);
+          component.setDistance(response.routes[0]);
+          component.setDuration(response.routes[0]);
         }
       });
     }
@@ -132,7 +135,53 @@ const GMapRouteComponent = Ember.Component.extend({
 
   waypointsChanged: observer('waypoints.@each.location', function() {
     run.once(this, 'updateRoute');
-  })
+  }),
+
+  setDistance(route) {
+    let distance = this.sumDistances(route.legs);
+    this.sendOnDistanceChange(distance, route);
+  },
+
+  setDuration(route) {
+    let duration = this.sumDurations(route.legs);
+    this.sendOnDurationChange(duration, route);
+  },
+
+  sumDistances(legs) {
+    let distance = 0;
+    for(var i = 0; i < legs.length; i++) {
+      distance += legs[i].distance.value;
+    }
+    return distance;
+  },
+
+  sumDurations(legs) {
+    let duration = 0;
+    for(var i = 0; i < legs.length; i++) {
+      duration += legs[i].duration.value;
+    }
+    return duration;
+  },
+
+  sendOnDistanceChange() {
+    const { onDistanceChange } = this.attrs;
+
+    if (typeOf(onDistanceChange) === 'function') {
+      onDistanceChange(...arguments);
+    } else {
+      this.sendAction('onDistanceChange', ...arguments);
+    }
+  },
+
+  sendOnDurationChange() {
+    const { onDurationChange } = this.attrs;
+
+    if (typeOf(onDurationChange) === 'function') {
+      onDurationChange(...arguments);
+    } else {
+      this.sendAction('onDurationChange', ...arguments);
+    }
+  }
 });
 
 GMapRouteComponent.reopenClass({
